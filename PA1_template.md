@@ -1,11 +1,7 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 Load all the required libraries
-``` {r load libraries}
+
+```r
 library(data.table)
 library(knitr)
 library(lattice)
@@ -13,15 +9,15 @@ library(xtable)
 ```
 
 Set echo=FALSE as Global option
-``` {r setoptions,echo=TRUE} 
-opts_chunk$set(eval = TRUE,echo=TRUE)
 
+```r
+opts_chunk$set(eval = TRUE,echo=TRUE)
 ```
 
 
 ## Loading and preprocessing the data
-``` {r load & preprocess the data}
 
+```r
 # check the data directory which holds the data files exists or not.
 # If it doesn't exist create a directory with name 'data'
 if (!file.exists("data"))
@@ -44,16 +40,14 @@ unzip(destinationUrl,"activity.csv")
 
 # read the csv file using read.csv()  with header attribute equals to TRUE
 activityData <- read.csv("activity.csv",header=TRUE);
-
-
 ```
 
 
 
 ## What is mean total number of steps taken per day?
 
-``` {r }
 
+```r
 # find the NAs records index using complete.cases()
 activityGoodDataIndex  <-  complete.cases(activityData)
 
@@ -82,23 +76,37 @@ setnames(steps_in_a_day,"total_steps_in_a_day","Total_Steps")
 histogram(steps_in_a_day$Total_Steps,breaks = 10, 
           xlab = "Total Steps in a Day", 
           main = "Distribution of Total Steps in a Day",type="count")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-1-1.png) 
+
+```r
 # mean of total steps 
 meanOfTotalSteps <- mean(steps_in_a_day$Total_Steps)
 
 # print meanOfTotalSteps
 meanOfTotalSteps
+```
 
+```
+## [1] 10766.19
+```
+
+```r
 # median of total steps
 medianOfTotalSteps <- median(steps_in_a_day$Total_Steps)
 
 #print medianOfTotalSteps
 medianOfTotalSteps
+```
 
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 # we'll re-use the activityDT data table
 
 # add a new column "avg_steps_of_an_interval" with the sum of steps by date
@@ -119,28 +127,37 @@ setnames(interval_and_average_steps,"avg_steps_of_an_interval","Average_Steps")
 plot(interval_and_average_steps$Interval,interval_and_average_steps$Average_Steps,
      type="l",xlab = "Time interval",ylab = "Average Steps", 
        main = "Time series - average steps vs time interval",col="orange")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
 
+```r
 #  Maximum Average steps of an interval 
 maxAverageStepsIntervalSubset <- subset(interval_and_average_steps,Average_Steps==max(Average_Steps))
 
 # Print the interval which has maximum average steps
 maxAverageStepsIntervalSubset$Interval
+```
 
-
+```
+## [1] 835
 ```
 
 
 
 ## Imputing missing values
 
-``` {r results="asis"}
+
+```r
 # number of missing values 
 numberOfNAs <- length(activityData$steps[is.na(activityData$steps)])
 
 numberOfNAs
+```
 
+[1] 2304
 
+```r
 # replace NAs in step column with  meanofTotalSteps in a day 
 # we use activityData which is defined in ## Loading and preprocessing the data
 # we use meanOfTotalSteps which is already calculated in ## What is mean total number of steps taken per day?
@@ -181,19 +198,31 @@ setnames(new_steps_in_a_day,"new_total_steps_in_a_day","Total_Steps")
 histogram(new_steps_in_a_day$Total_Steps,breaks = 10,
           xlab = "Total Steps in a Day", 
           main = "Distribution of Total Steps in a Day",type="count")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+```r
 # mean of total steps 
 newMeanOfTotalSteps <- mean(new_steps_in_a_day$Total_Steps)
 
 # print meanOfTotalSteps
 newMeanOfTotalSteps
+```
 
+[1] 10766.19
+
+```r
 # median of total steps
 newMedianOfTotalSteps <- median(new_steps_in_a_day$Total_Steps)
 
 #print medianOfTotalSteps
 newMedianOfTotalSteps
+```
 
+[1] 10766.19
+
+```r
 oldValues <- c(meanOfTotalSteps, medianOfTotalSteps)
 newValues <- c(newMeanOfTotalSteps, newMedianOfTotalSteps)
 table <- data.frame(oldValues, newValues)
@@ -201,13 +230,21 @@ result <- apply(table, 1, function(x) abs(x[2]-x[1]))
 table$absolutedifference <- result
 rownames(table)<-c("mean", "median")
 print(xtable(table), type="html")
-
 ```
+
+<!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
+<!-- Sat Feb 14 12:43:26 2015 -->
+<table border=1>
+<tr> <th>  </th> <th> oldValues </th> <th> newValues </th> <th> absolutedifference </th>  </tr>
+  <tr> <td align="right"> mean </td> <td align="right"> 10766.19 </td> <td align="right"> 10766.19 </td> <td align="right"> 0.00 </td> </tr>
+  <tr> <td align="right"> median </td> <td align="right"> 10765.00 </td> <td align="right"> 10766.19 </td> <td align="right"> 1.19 </td> </tr>
+   </table>
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-``` {r}
+
+```r
 # change the class of date column of activityData which was 
 # defined in  ## Loading and preprocessing the data
 
@@ -236,5 +273,6 @@ activityDT <- activityDT[,avg_steps_of_an_interval:=mean(steps,na.rm=TRUE),by=da
 # plot the time series
 xyplot(activityDT$avg_steps_of_an_interval ~ activityDT$interval | activityDT$dayType, layout = c(1,2), type = "l", 
        xlab = "Interval", ylab = "Average Number of steps", main = "Time series of number of steps vs time interval" )
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
